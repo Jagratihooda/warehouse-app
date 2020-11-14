@@ -25,6 +25,13 @@ public class WarehouseController {
     private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseController.class);
 
 
+    @GetMapping("read-warehouse-files")
+    public String readWarehouseInputFiles() {
+        LOGGER.info("Reading warehouse file endpoint called");
+        warehouseService.readInputFiles();
+        return "Files are uploaded successfully";
+    }
+
     @GetMapping("articles")
     public List<Article> fetchInventoryDetails() {
         LOGGER.info("Fetching Inventory details");
@@ -39,14 +46,7 @@ public class WarehouseController {
 
     }
 
-    @GetMapping("read-warehouse-files")
-    public String readWarehouseInputFiles() {
-        LOGGER.info("Reading warehouse file endpoint called");
-        warehouseService.readInputFiles();
-        return "Files are uploaded successfully";
-    }
-
-    @PostMapping("delete-product")
+    @PostMapping("update-product")
     public void updateProduct(@RequestParam(name = "id") long id) {
          warehouseService.updateProduct(id);
     }
