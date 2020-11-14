@@ -46,7 +46,7 @@ public class WarehouseController {
         return "Files are uploaded successfully";
     }
 
-    @PostMapping(value = "/delete-product")
+    @PostMapping("delete-product")
     public void updateProduct(@RequestParam(name = "id") long id) {
          warehouseService.updateProduct(id);
     }

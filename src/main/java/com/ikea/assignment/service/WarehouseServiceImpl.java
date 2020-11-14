@@ -83,8 +83,8 @@ public class WarehouseServiceImpl implements WarehouseService {
     /**
      * This method converts inventory json in to an object and save in database
      *
-     * @param inventoryJsonObj
-     * @param gson
+     * @param inventoryJsonObj - json object from an inventory file
+     * @param gson - gson object
      **/
     private void saveArticle(JSONObject inventoryJsonObj, Gson gson) {
         Inventory inputInventoryObj = gson.fromJson(inventoryJsonObj.toJSONString(), Inventory.class);
@@ -118,8 +118,8 @@ public class WarehouseServiceImpl implements WarehouseService {
     /**
      * This method converts product json in to an object and save in database
      *
-     * @param productJsonObj
-     * @param gson
+     * @param productJsonObj - json object from an inventory file
+     * @param gson - gson object
      **/
     private void saveProduct(JSONObject productJsonObj, Gson gson) {
         WarehouseProducts inputProductObj = gson.fromJson(productJsonObj.toJSONString(), WarehouseProducts.class);
@@ -129,14 +129,14 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         Product savedProduct = productRepository.save(productToBeSaved);
 
-        inputProductObj.getContain_articles().stream().forEach(p -> setProductArticle(p, savedProduct.getId()));
+        inputProductObj.getContain_articles().forEach(p -> setProductArticle(p, savedProduct.getId()));
     }
 
     /**
      * This method converts Contain_articles section of product json in to an object and save in database
      *
-     * @param inputProductArticle
-     * @param productId
+     * @param inputProductArticle - input ProductArticle
+     * @param productId - id of a Product
      **/
     private void setProductArticle(WarehouseProductArticle inputProductArticle, long productId) {
         ProductArticle prodArticle = ProductArticle.builder()
@@ -163,13 +163,13 @@ public class WarehouseServiceImpl implements WarehouseService {
      **/
     @Override
     public List<Product> fetchProductDetails() {
-        return productRepository.findByProductStatus(ProductStatus.IN_STOCK);
+        return productRepository.findByStatus(ProductStatus.IN_STOCK);
     }
 
     /**
      * This method updates the current status of a product to sold and also,updates the inventory accordingly
      *
-     * @param productId
+     * @param productId - id of a Product
      **/
     @Override
     public void updateProduct(long productId) {
@@ -193,9 +193,12 @@ public class WarehouseServiceImpl implements WarehouseService {
      **/
     private void fetchAndUpdateAnArticle(ProductArticle productArticle) {
         Optional<Article> existingArticle = articleRepository.findById(productArticle.getArticle().getId());
-        Article article = Article.builder().id(productArticle.getArticle().getId())
-                .stock(existingArticle.get().getStock() - productArticle.getArticleAmount()).name(productArticle.getArticle().getName()).build();
-        articleRepository.save(article);
+
+        if(existingArticle.isPresent()) {
+            Article article = Article.builder().id(productArticle.getArticle().getId())
+                    .stock(existingArticle.get().getStock() - productArticle.getArticleAmount()).name(productArticle.getArticle().getName()).build();
+            articleRepository.save(article);
+        }
     }
 
 }

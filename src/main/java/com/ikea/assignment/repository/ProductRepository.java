@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends CrudRepository<Product, Long> {
-    List<Product> findByProductStatus(ProductStatus productStatus);
+    List<Product> findByStatus(ProductStatus productStatus);
 }
 
