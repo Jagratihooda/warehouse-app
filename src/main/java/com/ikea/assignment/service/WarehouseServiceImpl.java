@@ -196,7 +196,8 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         if(existingArticle.isPresent()) {
             Article article = Article.builder().id(productArticle.getArticle().getId())
-                    .stock(existingArticle.get().getStock() - productArticle.getArticleAmount()).name(productArticle.getArticle().getName()).build();
+                    .stock(existingArticle.get().getStock() - productArticle.getArticleAmount())
+                    .name(productArticle.getArticle().getName()).build();
             articleRepository.save(article);
         }
     }
