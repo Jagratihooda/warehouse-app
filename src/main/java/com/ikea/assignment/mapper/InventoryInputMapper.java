@@ -1,4 +1,5 @@
 package com.ikea.assignment.mapper;
+
 import com.ikea.assignment.domain.Article;
 import com.ikea.assignment.model.Inventory;
 

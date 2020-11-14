@@ -3,14 +3,12 @@ package com.ikea.assignment.service;
 import java.io.*;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 import com.google.gson.Gson;
 import com.ikea.assignment.domain.Product;
 import com.ikea.assignment.enums.ProductStatus;
 import com.ikea.assignment.exception.ServiceException;
 import com.ikea.assignment.mapper.InventoryInputMapper;
-import com.ikea.assignment.mapper.InventoryOutputMapper;
-import com.ikea.assignment.mapper.ProductOutputMapper;
 import com.ikea.assignment.model.WarehouseProductArticle;
 import com.ikea.assignment.model.WarehouseProducts;
 import com.ikea.assignment.repository.ProductArticleRepository;
@@ -28,6 +26,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.transaction.Transactional;
 
 
 /**
@@ -56,37 +56,48 @@ public class WarehouseServiceImpl implements WarehouseService {
     private ProductArticleRepository productArticleRepository;
 
     @Override
+    @Transactional
     public void readInputFiles() {
-        LOGGER.info("Started reading the input files");
         readInventoryFile();
         readProductsFile();
     }
 
-    public List<Article> fetchArticles() {
+    /**
+     * This method reads inventory input file and save in database
+     **/
+    private void readInventoryFile() {
+        LOGGER.info("Starting reading the inventory input file");
+        JSONParser jsonParser = new JSONParser();
+        Gson gson = new Gson();
 
-        List<Article> articleList = (List<Article>) articleRepository.findAll();
+        try (FileReader reader = new FileReader(inventoryFilePath)) {
+            JSONObject obj = (JSONObject) jsonParser.parse(reader);
+            JSONArray articleList = (JSONArray) obj.get("inventory");
+            articleList.forEach(article -> saveArticle((JSONObject) article, gson));
 
-       // return articleList.stream().map(InventoryOutputMapper::map).collect(Collectors.toList());
-        return articleList;
-    }
-
-    public List<Product> fetchProductDetails() {
-        List<Product> productDetails = (List<Product>) productRepository.findAll();
-
-       /* return productDetails.stream().filter(p -> ProductStatus.IN_STOCK
-                .equals(p.getStatus()))
-        .map(ProductOutputMapper::map).collect(Collectors.toList());*/
-        List<Product> products = productDetails.stream().filter(p -> ProductStatus.IN_STOCK
-                .equals(p.getStatus())).collect(Collectors.toList());
-        return products;
+        } catch (Exception e) {
+            throw new ServiceException("Exception occurred while reading the inventory file", e);
+        }
     }
 
     /**
-     * This method downloads Incident Statistics report
+     * This method converts inventory json in to an object and save in database
      *
-     * @return resource
+     * @param inventoryJsonObj
+     * @param gson
+     **/
+    private void saveArticle(JSONObject inventoryJsonObj, Gson gson) {
+        Inventory inputInventoryObj = gson.fromJson(inventoryJsonObj.toJSONString(), Inventory.class);
+        articleRepository.save(InventoryInputMapper.map(inputInventoryObj));
+    }
+
+
+    /**
+     * This method reads products input file and save in database
      */
     private void readProductsFile() {
+        LOGGER.info("Starting reading the products input file");
+
         JSONParser jsonParser = new JSONParser();
         Gson gson = new Gson();
 
@@ -98,69 +109,93 @@ public class WarehouseServiceImpl implements WarehouseService {
             productList.forEach(product ->
                     saveProduct((JSONObject) product, gson));
 
-
         } catch (Exception e) {
-            LOGGER.error("Exception occurred while reading the products file and the exception is " + e);
             throw new ServiceException("Exception occurred while reading the products file", e);
         }
 
     }
 
-    private void saveProduct(JSONObject productJsonObj, Gson gson){
-        WarehouseProducts product = gson.fromJson(productJsonObj.toJSONString(), WarehouseProducts.class);
-        Product productToBeSaved = ProductInputMapper.map(product);
+    /**
+     * This method converts product json in to an object and save in database
+     *
+     * @param productJsonObj
+     * @param gson
+     **/
+    private void saveProduct(JSONObject productJsonObj, Gson gson) {
+        WarehouseProducts inputProductObj = gson.fromJson(productJsonObj.toJSONString(), WarehouseProducts.class);
+
+        Product productToBeSaved = ProductInputMapper.map(inputProductObj);
         productToBeSaved.setStatus(ProductStatus.IN_STOCK);
+
         Product savedProduct = productRepository.save(productToBeSaved);
 
-        product.getContain_articles().stream().forEach(p -> setProductArticle(p, savedProduct.getId()));
+        inputProductObj.getContain_articles().stream().forEach(p -> setProductArticle(p, savedProduct.getId()));
     }
 
-      private void setProductArticle(WarehouseProductArticle prdctArtcl, long productId){
-       ProductArticle prodArticle = ProductArticle.builder()
-               .article(Article.builder().id(prdctArtcl.getArt_id()).build())
-               .articleAmount(prdctArtcl.getAmount_of()).product(Product.builder().id(productId).build())
-               .build();
-          productArticleRepository.save(prodArticle);
-}
     /**
-     * This method downloads Incident Statistics report
+     * This method converts Contain_articles section of product json in to an object and save in database
      *
-     * @return resource
-     */
-    private void readInventoryFile() {
-        JSONParser jsonParser = new JSONParser();
-        Gson gson = new Gson();
-
-        try (FileReader reader = new FileReader(inventoryFilePath)) {
-            JSONObject obj = (JSONObject) jsonParser.parse(reader);
-            JSONArray articleList = (JSONArray) obj.get("inventory");
-            articleList.forEach(article -> saveArticle((JSONObject) article, gson));
-
-        } catch (Exception e) {
-            LOGGER.error("Exception occurred while reading the inventory file and the exception is " + e);
-            throw new ServiceException("Exception occurred while reading the inventory file", e);
-        }
-
+     * @param inputProductArticle
+     * @param productId
+     **/
+    private void setProductArticle(WarehouseProductArticle inputProductArticle, long productId) {
+        ProductArticle prodArticle = ProductArticle.builder()
+                .article(Article.builder().id(inputProductArticle.getArt_id()).build())
+                .articleAmount(inputProductArticle.getAmount_of()).product(Product.builder().id(productId).build())
+                .build();
+        productArticleRepository.save(prodArticle);
     }
 
-    private void saveArticle(JSONObject inventoryJsonObj, Gson gson) {
-        Inventory inventory = gson.fromJson(inventoryJsonObj.toJSONString(), Inventory.class);
-        articleRepository.save(InventoryInputMapper.map(inventory));
+    /**
+     * This method fetches all the articles available in database
+     *
+     * @return articleList
+     **/
+    @Override
+    public List<Article> fetchArticles() {
+        return (List<Article>) articleRepository.findAll();
     }
 
-    public WarehouseProducts updateProduct(long productId) {
-        // product.getId(); //check whether this exists
+    /**
+     * This method fetches all the IN_STOCK products available in database
+     *
+     * @return articleList
+     **/
+    @Override
+    public List<Product> fetchProductDetails() {
+        return productRepository.findByProductStatus(ProductStatus.IN_STOCK);
+    }
+
+    /**
+     * This method updates the current status of a product to sold and also,updates the inventory accordingly
+     *
+     * @param productId
+     **/
+    @Override
+    public void updateProduct(long productId) {
         Optional<Product> savedProduct = productRepository.findById(productId);
-        Product existingProduct = savedProduct.get();
-        existingProduct.getProductArticle().forEach( p ->{
-            Optional<Article> existingArticle = articleRepository.findById(p.getArticle().getId());
-            Article article = Article.builder().id(p.getArticle().getId())
-                    .stock(existingArticle.get().getStock() - p.getArticleAmount()).name(p.getArticle().getName()).build();
-            articleRepository.save(article);
-        });
-        existingProduct.setStatus(ProductStatus.SOLD);
-        productRepository.save(existingProduct);
-        return null;
+
+        if (savedProduct.isPresent()) {
+
+            //Iterate over productArticles of a product, fetch articles and update them accordingly
+            savedProduct.get().getProductArticle().forEach(this::fetchAndUpdateAnArticle);
+
+            //Set Status of a product to SOLD
+            savedProduct.get().setStatus(ProductStatus.SOLD);
+            productRepository.save(savedProduct.get());
+        }
+    }
+
+    /**
+     * This method fetches the given article and updates its amount after the product is sold
+     *
+     * @param productArticle object of a product
+     **/
+    private void fetchAndUpdateAnArticle(ProductArticle productArticle) {
+        Optional<Article> existingArticle = articleRepository.findById(productArticle.getArticle().getId());
+        Article article = Article.builder().id(productArticle.getArticle().getId())
+                .stock(existingArticle.get().getStock() - productArticle.getArticleAmount()).name(productArticle.getArticle().getName()).build();
+        articleRepository.save(article);
     }
 
 }

@@ -1,6 +1,5 @@
 package com.ikea.assignment.model;
 
-
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,8 +11,4 @@ public class Inventory {
     private String name;
     private long stock;
 
-    @Override
-    public String toString (){
-        return art_id + name + stock;
-    }
 }

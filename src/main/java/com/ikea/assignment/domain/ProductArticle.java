@@ -24,6 +24,6 @@ public class ProductArticle {
     @JoinColumn(name = "productId", referencedColumnName = "id")
     private Product product;
 
-    @Column(name = "article_amount" )
+    @Column(name = "article_amount")
     private long articleAmount;
 }

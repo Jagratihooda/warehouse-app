@@ -6,9 +6,9 @@ package com.ikea.assignment.exception;
  */
 public class ServiceException extends RuntimeException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public ServiceException(String message, Exception e) {
-		super(message, e);
-	}
+    public ServiceException(String message, Exception e) {
+        super(message, e);
+    }
 }

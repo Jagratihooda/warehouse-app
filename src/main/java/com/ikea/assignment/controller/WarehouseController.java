@@ -2,14 +2,10 @@ package com.ikea.assignment.controller;
 
 import com.ikea.assignment.domain.Article;
 import com.ikea.assignment.domain.Product;
-import com.ikea.assignment.model.Inventory;
-import com.ikea.assignment.model.WarehouseProducts;
 import com.ikea.assignment.service.WarehouseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +18,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/warehouse/")
 public class WarehouseController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseController.class);
+
     @Autowired
     private WarehouseService warehouseService;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseController.class);
 
 
     @GetMapping("articles")
@@ -48,18 +46,9 @@ public class WarehouseController {
         return "Files are uploaded successfully";
     }
 
-
-    //@GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    //@ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<WarehouseProducts> updateProduct(@PathVariable(value = "id") long id){
-
-/*
-                                                         //  //,@RequestBody WarehouseProducts product) {
-*/
-
-        return new ResponseEntity<>(warehouseService.updateProduct(id), HttpStatus.OK);
+    @PostMapping(value = "/delete-product")
+    public void updateProduct(@RequestParam(name = "id") long id) {
+         warehouseService.updateProduct(id);
     }
-
 
 }

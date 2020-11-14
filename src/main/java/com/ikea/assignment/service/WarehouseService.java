@@ -13,15 +13,27 @@ import java.util.List;
  */
 public interface WarehouseService {
 	/**
-	 * This method generates Incident Statistics report
-	 * @return fileName
+	 * This method reads inventory and product input json files
 	 */
 	void readInputFiles();
 
+	/**
+	 * This method fetches Articles from the dataBase
+	 @return list of Articles
+	 */
 	List<Article> fetchArticles();
 
+	/**
+	 * This method fetches Products from the dataBase
+	 @return list of Products
+	 */
 	List<Product> fetchProductDetails();
 
-	WarehouseProducts updateProduct(long productId);
+	/**
+	 * This method updates a given Product
+	 @param  productId
+	 @return list of Products
+	 */
+	void updateProduct(long productId);
 
 }

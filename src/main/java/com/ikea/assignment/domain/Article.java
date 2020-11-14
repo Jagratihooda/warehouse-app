@@ -1,6 +1,8 @@
 package com.ikea.assignment.domain;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
+
 import javax.persistence.*;
 import java.util.Set;
 
