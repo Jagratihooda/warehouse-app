@@ -3,8 +3,6 @@
 
 ***Tech Stack***
 
-***Tools & Techniques used***
-
 ***Backend:***
 
 - Java 1.8
@@ -52,6 +50,8 @@ localhost:8081
 
 ***Potential improvements***
 
-Frontend Angular implementation
-Support for reading multiple Inventory and products files
-More?
+- Frontend Angular implementation
+
+- Support for reading multiple Inventory and products files
+
+- More?
