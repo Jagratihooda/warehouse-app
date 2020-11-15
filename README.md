@@ -28,7 +28,9 @@
 - Spring Boot will create tables.
 
 - Run with maven
+
   mvn test
+  
   mvn spring-boot:run
   
 - Hit below URL in browser to run the application.
