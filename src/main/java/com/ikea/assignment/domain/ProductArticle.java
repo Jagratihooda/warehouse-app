@@ -1,8 +1,10 @@
 package com.ikea.assignment.domain;
 
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -24,6 +26,16 @@ public class ProductArticle {
     @JoinColumn(name = "productId", referencedColumnName = "id")
     private Product product;
 
-    @Column(name = "article_amount")
+    @Column
     private long articleAmount;
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(updatable = false)
+    private Date createdDate;
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column
+    private Date updatedDate;
 }

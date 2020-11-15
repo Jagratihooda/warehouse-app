@@ -7,6 +7,10 @@ import com.ikea.assignment.model.WarehouseProducts;
 
 import java.util.stream.Collectors;
 
+/**
+ * @author Jagrati
+ * This mapper is for mapping input Product data to Article domain object.
+ */
 public class ProductInputMapper {
 
     public static Product map(WarehouseProducts product) {

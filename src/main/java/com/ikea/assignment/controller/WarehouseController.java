@@ -29,26 +29,25 @@ public class WarehouseController {
     public String readWarehouseInputFiles() {
         LOGGER.info("Reading warehouse file endpoint called");
         warehouseService.readInputFiles();
-        return "Files are uploaded successfully";
+        return "Input files Data is uploaded successfully";
     }
 
     @GetMapping("articles")
     public List<Article> fetchInventoryDetails() {
         LOGGER.info("Fetching Inventory details");
         return warehouseService.fetchArticles();
-
     }
 
     @GetMapping("products")
     public List<Product> fetchAllProducts() {
         LOGGER.info("Fetching Product details");
         return warehouseService.fetchProductDetails();
-
     }
 
-    @PostMapping("update-product")
-    public void updateProduct(@RequestParam(name = "id") long id) {
-         warehouseService.updateProduct(id);
+    @PostMapping("sell-product")
+    public void sellProduct(@RequestParam(name = "id") long id) {
+        LOGGER.info("Selling product with id "+ id);
+        warehouseService.updateProduct(id);
     }
 
 }

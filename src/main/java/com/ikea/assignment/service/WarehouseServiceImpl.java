@@ -1,8 +1,10 @@
 package com.ikea.assignment.service;
 
 import java.io.*;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import com.ikea.assignment.domain.Product;
@@ -84,7 +86,7 @@ public class WarehouseServiceImpl implements WarehouseService {
      * This method converts inventory json in to an object and save in database
      *
      * @param inventoryJsonObj - json object from an inventory file
-     * @param gson - gson object
+     * @param gson             - gson object
      **/
     private void saveArticle(JSONObject inventoryJsonObj, Gson gson) {
         Inventory inputInventoryObj = gson.fromJson(inventoryJsonObj.toJSONString(), Inventory.class);
@@ -119,7 +121,7 @@ public class WarehouseServiceImpl implements WarehouseService {
      * This method converts product json in to an object and save in database
      *
      * @param productJsonObj - json object from an inventory file
-     * @param gson - gson object
+     * @param gson           - gson object
      **/
     private void saveProduct(JSONObject productJsonObj, Gson gson) {
         WarehouseProducts inputProductObj = gson.fromJson(productJsonObj.toJSONString(), WarehouseProducts.class);
@@ -136,7 +138,7 @@ public class WarehouseServiceImpl implements WarehouseService {
      * This method converts Contain_articles section of product json in to an object and save in database
      *
      * @param inputProductArticle - input ProductArticle
-     * @param productId - id of a Product
+     * @param productId           - id of a Product
      **/
     private void setProductArticle(WarehouseProductArticle inputProductArticle, long productId) {
         ProductArticle prodArticle = ProductArticle.builder()
@@ -153,7 +155,13 @@ public class WarehouseServiceImpl implements WarehouseService {
      **/
     @Override
     public List<Article> fetchArticles() {
-        return (List<Article>) articleRepository.findAll();
+        List<Article> articleList = (List<Article>) articleRepository.findAll();
+
+        List<Article> sortedArticleList = articleList.stream()
+                .sorted(Comparator.comparingLong(Article::getId))
+                .collect(Collectors.toList());
+
+        return sortedArticleList;
     }
 
     /**
@@ -194,7 +202,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     private void fetchAndUpdateAnArticle(ProductArticle productArticle) {
         Optional<Article> existingArticle = articleRepository.findById(productArticle.getArticle().getId());
 
-        if(existingArticle.isPresent()) {
+        if (existingArticle.isPresent()) {
             Article article = Article.builder().id(productArticle.getArticle().getId())
                     .stock(existingArticle.get().getStock() - productArticle.getArticleAmount())
                     .name(productArticle.getArticle().getName()).build();

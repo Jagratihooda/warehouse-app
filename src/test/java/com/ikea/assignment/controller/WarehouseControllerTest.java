@@ -72,13 +72,7 @@ public class WarehouseControllerTest {
 
     @Test
     public void updateProductTest() {
-      /*  InputStreamResource is = new InputStreamResource(new ByteArrayInputStream("testString".getBytes()));
-        Mockito.when(incidentStatisticsGeneratorService.downloadReport()).thenReturn(is);
-        ResponseEntity<?> result = incidentStatisticsGeneratorController.downloadIncidentsStatistics();
-        assertEquals(200, result.getStatusCode().value());
-        assertEquals(MediaType.parseMediaType("text/csv"), result.getHeaders().getContentType());*/
-        //Mockito.when(warehouseService.readInputFiles()).thenReturn(is);
-        warehouseController.updateProduct(Mockito.anyLong());
+        warehouseController.sellProduct(Mockito.anyLong());
         Mockito.verify(warehouseService).updateProduct(Mockito.anyLong());
 
     }

@@ -3,9 +3,11 @@ package com.ikea.assignment.domain;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.ikea.assignment.enums.ProductStatus;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -21,10 +23,10 @@ public class Product {
     @Column(name = "id", nullable = false)
     private long id;
 
-    @Column(name = "name")
+    @Column
     private String name;
 
-    @Column(name = "price")
+    @Column
     private BigDecimal price;
 
     @Enumerated(EnumType.STRING)
@@ -34,4 +36,13 @@ public class Product {
     @JsonBackReference
     private List<ProductArticle> productArticle;
 
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(updatable = false)
+    private Date createdDate;
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column
+    private Date updatedDate;
 }
